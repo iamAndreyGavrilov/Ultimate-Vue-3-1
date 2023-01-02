@@ -3,14 +3,40 @@ import {ref} from 'vue'
 
 const showModal = ref(false)
 
+const newNote = ref('')
+
+const errorMessage = ref('')
+
+const notes = ref([])
+
+function getRandomColor() {
+  return "hsl(" + Math.random() * 360 + ", 100%, 75%)";
+}
+
+const addNote = () => {
+  if (newNote.value.length < 10) {
+    return errorMessage.value = 'Note must be at least 10 characters long'
+  }
+  notes.value.push({
+    id: Math.floor(Math.random() * 1000000),
+    text: newNote.value,
+    date: new Date().toLocaleDateString('en-US'),
+    backgroundColor: getRandomColor(),
+  })
+  newNote.value = ''
+  showModal.value = false
+  errorMessage.value = ''
+}
+
 </script>
 
 <template>
   <main>
     <div v-show="showModal" class="overlay">
       <div class="modal">
-        <textarea name="note" id="note" cols="30" rows="10"></textarea>
-        <button>Add Note</button>
+        <textarea v-model.trim="newNote" name="note" id="note" cols="30" rows="10"></textarea>
+        <p v-if="errorMessage">{{ errorMessage }}</p>
+        <button @click="addNote">Add Note</button>
         <button class="close" @click="showModal = false">Close</button>
       </div>
     </div>
@@ -20,15 +46,14 @@ const showModal = ref(false)
         <button class="btn" @click="showModal = true">+</button>
       </header>
       <div class="cards-container">
-        <div class="card">
-          <p class="main-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. At atque dolores id neque
-            quaerat vero.</p>
-          <p class="date">02/01/2023</p>
+        <div class="card" :style="{backgroundColor: note.backgroundColor}" v-for="note in notes" :key="note.id">
+          <p class="main-text">{{ note.text }}</p>
+          <p class="date">{{ note.date }}</p>
         </div>
         <div class="card">
-          <p class="main-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. At atque dolores id neque
-            quaerat vero.</p>
-          <p class="date">02/01/2023</p>
+          <p class="main-text">
+            Add new note</p>
+          <p class="date">Right now!</p>
         </div>
       </div>
     </div>
@@ -57,7 +82,6 @@ header {
 h1 {
   font-size: 75px;
   font-weight: bold;
-  /*margin-bottom: 25px;*/
 }
 
 .btn {
@@ -88,6 +112,7 @@ h1 {
 
 .main-text {
   font-size: 20px;
+  overflow: hidden;
 }
 
 .date {
@@ -142,5 +167,12 @@ textarea {
 
 .modal .close {
   background-color: red;
+}
+
+.modal p {
+  color: red;
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 10px;
 }
 </style>
